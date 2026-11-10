@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
-<!-- 水墨萬年曆 v9：八卦占卜加入家庭運勢 -->
+<!-- 水墨萬年曆 v9.1：八卦占卜加入家庭運勢；無變卦時也顯示說明
+     檔名後面的 ?v=9.1 是版本號：每次更新就改這個數字，瀏覽器才會下載新的檔案，不會用到舊的暫存 -->
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>水墨萬年曆</title>
 <meta name="description" content="中國水墨留白風格的萬年曆：農曆、國定假日、行事曆、城市天氣、每日學習、八卦占卜">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=9.1">
 </head>
 <body>
 <!-- 背景三層：底圖（已移除竹子與船）、竹子、小船 -->
@@ -303,13 +304,13 @@
 </div>
 
 <!-- 程式：順序很重要，後面的檔案會用到前面檔案的函式 -->
-<script src="js/config.js"></script>     <!-- 設定（PHP 位置、氣象署授權碼） -->
-<script src="js/flowers.js"></script>    <!-- 水墨花朵與花邊 -->
-<script src="js/lunar.js"></script>      <!-- 農曆換算 -->
-<script src="js/holidays.js"></script>   <!-- 國定假日與節日 -->
-<script src="js/app.js"></script>        <!-- 萬年曆主程式 -->
-<script src="js/study.js"></script>      <!-- 每日學習 -->
-<script src="js/weather.js"></script>    <!-- 城市天氣 -->
-<script src="js/divination.js"></script> <!-- 八卦占卜 -->
+<script src="js/config.js?v=9.1"></script>     <!-- 設定（PHP 位置、氣象署授權碼） -->
+<script src="js/flowers.js?v=9.1"></script>    <!-- 水墨花朵與花邊 -->
+<script src="js/lunar.js?v=9.1"></script>      <!-- 農曆換算 -->
+<script src="js/holidays.js?v=9.1"></script>   <!-- 國定假日與節日 -->
+<script src="js/app.js?v=9.1"></script>        <!-- 萬年曆主程式 -->
+<script src="js/study.js?v=9.1"></script>      <!-- 每日學習 -->
+<script src="js/weather.js?v=9.1"></script>    <!-- 城市天氣 -->
+<script src="js/divination.js?v=9.1"></script> <!-- 八卦占卜 -->
 </body>
 </html>

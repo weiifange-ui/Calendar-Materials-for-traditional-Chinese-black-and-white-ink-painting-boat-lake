@@ -1,5 +1,5 @@
 /* =========================================================
-   水墨萬年曆 v9｜八卦占卜
+   水墨萬年曆 v9.1｜八卦占卜
    三錢搖卦、本卦與變卦、學業／愛情／財運／家庭
    ========================================================= */
 /* =========================================================
@@ -341,6 +341,14 @@ function showResult(values) {
   if (hasChange) {
     const bianLines = benLines.map((y, i) => changing[i] ? 1 - y : y);
     html += card("變卦", findHexagram(bianLines), bianLines, [], "事情後續的發展");
+  } else {
+    // 沒有變爻時，還是留一張「變卦」說明，讓使用者知道為什麼只有一卦
+    html += `<article class="hexCard">
+      <h2>變卦</h2>
+      <div class="hexHead"><div><div class="hexName">無變卦</div>
+      <div class="hexMeta">這次六次都沒有擲出老陰或老陽</div></div></div>
+      <p class="hexMeta">代表事情目前穩定，後續不會有太大變化，以本卦的解釋為準。</p>
+    </article>`;
   }
   hexCards.innerHTML = html;
   result.classList.add("show");
