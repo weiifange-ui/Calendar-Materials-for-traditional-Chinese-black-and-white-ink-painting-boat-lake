@@ -1,0 +1,4 @@
+# 授權碼不要上傳到 GitHub
+php/config.php
+# PHP 的暫存資料
+php/cache/
