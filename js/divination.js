@@ -1,5 +1,5 @@
 /* =========================================================
-   水墨萬年曆 v8｜八卦占卜
+   水墨萬年曆 v8.2｜八卦占卜
    三錢搖卦、本卦與變卦、學業／愛情／財運
    ========================================================= */
 /* =========================================================
@@ -185,8 +185,7 @@ function buildBagua() {
     const op = .7 + Math.random() * .3;
     t.innerHTML = TRIGRAMS[key].lines.map((yang, j) => yaoStrokes(-30, 16 - j * 16, 60, 9, yang, op)).join("");
     // 卦名小字
-    const label = el("text", { y: -32, "text-anchor": "middle", "font-size": 13, fill: "currentColor", "fill-opacity": .55,
-      "font-family": "LXGW WenKai TC, serif" }, t);
+    const label = el("text", { y: -32, "text-anchor": "middle", "font-size": 13, fill: "currentColor", "fill-opacity": .55 }, t);
     label.textContent = key;
   });
 }
@@ -205,7 +204,7 @@ function makeCoin() {
   el("circle", { r: 24, fill: "none", stroke: "currentColor", "stroke-width": .8, "stroke-opacity": .5 }, face);
   el("rect", { x: -7.5, y: -7.5, width: 15, height: 15, fill: "none", stroke: "currentColor", "stroke-width": 2 }, face);
   [["太",0,-12],["平",0,20],["通",15,4],["寶",-15,4]].forEach(([w, x, y]) => {
-    const t = el("text", { x, y, "text-anchor": "middle", "font-size": 11, fill: "currentColor", "font-family": "LXGW WenKai TC, serif" }, face);
+    const t = el("text", { x, y, "text-anchor": "middle", "font-size": 11, fill: "currentColor" }, face);
     t.textContent = w;
   });
   // 背面：濃墨實心，中間留一個方孔

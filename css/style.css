@@ -1,5 +1,5 @@
 /* =========================================================
-   水墨萬年曆 v8｜樣式
+   水墨萬年曆 v8.2｜樣式
    顏色、版面、月曆格子、動畫、抽屜、對話框
    ========================================================= */
   /* ===== 顏色設定 ===== */
@@ -33,7 +33,10 @@
   }
   *, *::before, *::after { box-sizing: inherit; }
   html, body { margin: 0; min-height: 100%; }
-  body { background: var(--paper); color: var(--ink); line-height: 1.6; }
+  body {
+    background: var(--paper); color: var(--ink); line-height: 1.6;
+    font-family: system-ui, sans-serif;   /* 系統介面字體：會跟著手機或電腦的字體設定 */
+  }
 
   /* ===== 背景：分成三層（底圖、竹子、小船），竹子和船可以各自動 ===== */
   .scene { position: fixed; inset: 0; z-index: 0; overflow: hidden; filter: var(--bg-filter); }
@@ -285,6 +288,7 @@
     margin: calc(14px + env(safe-area-inset-top, 0px)) 16px 0 0;
     width: 52px; height: 52px; padding: 0; border: 0; border-radius: 50%;
     background: none; color: var(--ink); cursor: pointer; opacity: .55; transition: opacity .3s;
+    font: inherit;   /* 跟著網頁的字體 */
   }
   .launcher:hover, .launcher:focus-visible { opacity: .95; }
   .launcher:focus-visible { outline: 1px dashed var(--ink); outline-offset: 4px; }
@@ -522,3 +526,25 @@
 .w-foot .link { margin-left: auto; font-size: .78rem; }
 .w-foot p { margin: 6px 0 0; line-height: 1.6; }
 @media (max-width: 600px) { .launcher.weather { margin-top: calc(120px + env(safe-area-inset-top, 0px)); } }
+
+/* =====================================================
+   RWD 修正（v8.1）
+   平板與手機：右上角三個入口改成橫排，不擋到月曆；
+   底部留空間，捲到最下面時內容不會被左下角工具列蓋住
+   ===================================================== */
+main { padding-bottom: 96px; }
+@media (max-width: 900px) {
+  main { padding-top: 76px; }
+  .launcher, .launcher.study, .launcher.weather { width: 44px; height: 44px; margin-top: calc(12px + env(safe-area-inset-top, 0px)); }
+  .launcher { margin-right: 12px; }            /* 八卦：最右邊 */
+  .launcher.study { margin-right: 64px; }      /* 學：中間 */
+  .launcher.weather { margin-right: 116px; }   /* 氣：最左邊 */
+  .launcher .tip { right: 50%; transform: translateX(50%); }
+}
+@media (max-width: 600px) {
+  main { padding-top: 64px; }
+  .launcher, .launcher.study, .launcher.weather { width: 40px; height: 40px; margin-top: calc(10px + env(safe-area-inset-top, 0px)); }
+  .launcher { margin-right: 10px; }
+  .launcher.study { margin-right: 56px; }
+  .launcher.weather { margin-right: 102px; }
+}
