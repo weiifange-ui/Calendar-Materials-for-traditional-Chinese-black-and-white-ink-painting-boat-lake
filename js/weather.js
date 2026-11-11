@@ -1,7 +1,7 @@
 /* =========================================================
-   水墨萬年曆 v8｜城市天氣
+   水墨萬年曆 v14（GitHub 完整版）｜城市天氣
    天氣資料：Open-Meteo（免費、不需要授權碼，台灣與國外都能查）
-   天氣警報：中央氣象署（只有台灣；透過 php/cwa-alerts.php 取得）
+   天氣特報：中央氣象署（只有台灣；在 config.js 填入授權碼才會顯示，選用）
    整段包在 (() => { ... })() 裡，不和其他程式互相干擾
    ========================================================= */
 (() => {
@@ -74,7 +74,7 @@
   let view = "list";       // list 城市、compare 比較
   const openForecast = new Set();
 
-  /* ---------- 取得天氣（Open-Meteo） ---------- */
+  /* ---------- 取得天氣（直接向 Open-Meteo 要，免費、不需要授權碼） ---------- */
   async function fetchCity(c) {
     const url = "https://api.open-meteo.com/v1/forecast"
       + `?latitude=${c.lat}&longitude=${c.lon}`
@@ -93,10 +93,9 @@
     try { return await fetch(url, { signal: ctrl.signal }); } finally { clearTimeout(t); }
   }
 
-  /* ---------- 取得天氣警報（中央氣象署） ----------
-     1. 先找 PHP 中繼站（授權碼藏在 PHP 裡，別人看不到）
-     2. 沒有 PHP 時，如果 config.js 有填授權碼，就直接向氣象署要
-     3. 兩個都沒有，就只顯示依天氣數值判斷的提醒 */
+  /* ---------- 台灣天氣特報（中央氣象署，選用） ----------
+     config.js 有填授權碼，才會向氣象署取得特報；沒填就略過。
+     不管有沒有填，每個城市都會依照天氣數值顯示高溫、低溫、降雨、強風、雷雨提醒。 */
   function parseCwa(json) {
     const out = {};
     const list = (json.records && json.records.location) || [];
@@ -109,22 +108,14 @@
     return out;
   }
   async function fetchAlerts() {
+    alerts = null; alertState = "";
+    if (!CONFIG.CWA_API_KEY) return;            // 沒有授權碼：不顯示特報，也不顯示任何錯誤
     try {
-      const res = await fetchWithTimeout(CONFIG.PHP_BASE + "cwa-alerts.php", 5000);
-      const json = await res.json();
-      if (json.ok) { alerts = json.alerts || {}; alertState = "天氣警報：中央氣象署"; return; }
-    } catch (e) { /* 沒有 PHP（例如放在 GitHub Pages），改用下一個方法 */ }
-    if (CONFIG.CWA_API_KEY) {
-      try {
-        const url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/W-C0033-001?format=JSON&Authorization=" + encodeURIComponent(CONFIG.CWA_API_KEY);
-        const res = await fetchWithTimeout(url, 8000);
-        alerts = parseCwa(await res.json());
-        alertState = "天氣警報：中央氣象署";
-        return;
-      } catch (e) { /* 連不上就算了 */ }
-    }
-    alerts = null;
-    alertState = "尚未連上中央氣象署，台灣天氣特報暫時無法顯示";
+      const url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/W-C0033-001?format=JSON&Authorization=" + encodeURIComponent(CONFIG.CWA_API_KEY);
+      const res = await fetchWithTimeout(url, 8000);
+      alerts = parseCwa(await res.json());
+      alertState = "天氣警報：中央氣象署";
+    } catch (e) { /* 連不上就只顯示數值提醒 */ }
   }
 
   async function refresh() {

@@ -1,78 +1,178 @@
 <!DOCTYPE html>
+<!--
+  ==========================================================================
+  水墨萬年曆 v14（GitHub 完整版）｜index.html（網頁的骨架）
+
+  【先認識註解】
+  像這一大段文字一樣，被「開頭記號」和「結尾記號」包起來的內容叫做「註解」
+  （開頭記號是：小於、驚嘆號、兩個減號；結尾記號是：兩個減號、大於），
+  註解是寫給人看的說明，瀏覽器會完全忽略它，不會顯示在畫面上。
+
+  【HTML 是什麼】
+  HTML 用「標籤」來描述網頁上有哪些東西。標籤長這樣：
+      <p>這是一段文字</p>
+      ↑開始標籤      ↑結束標籤（多一個斜線 /）
+  開始和結束之間的就是內容。有些標籤沒有內容，就不需要結束標籤，例如 <img>、<input>。
+
+  【屬性】
+  標籤裡面可以寫「屬性」，用來補充設定，格式是  名稱="值"：
+      <img src="cat.jpg" alt="一隻貓">
+           ↑src 是圖片位置  ↑alt 是圖片的文字說明
+
+  【這個專案最常用的兩個屬性】
+  id="名稱"     ：幫元素取一個「獨一無二」的名字，JavaScript 會用它找到這個元素
+                  （例如 document.getElementById("today") 就是找 id="today" 的按鈕）
+  class="名稱"  ：幫元素分類，可以很多個元素用同一個 class，CSS 會用它決定外觀
+                  （例如 style.css 裡的 .calendar { ... } 就是設定 class="calendar" 的樣子）
+
+  【aria- 開頭的屬性】
+  給「螢幕閱讀器」（視障朋友用來朗讀網頁的軟體）看的說明，
+  例如 aria-label="打開八卦占卜" 會被唸出來，讓看不到圖示的人也知道按鈕的用途。
+  aria-hidden="true" 則是「這只是裝飾，不用唸出來」。
+
+  【檔名後面的 ?v=14】
+  這是版本號。瀏覽器會記住下載過的檔案（暫存），更新程式後如果不改這個數字，
+  瀏覽器可能還在用舊的檔案。每次更新，就把所有 ?v= 後面的數字改掉。
+  ==========================================================================
+-->
+
+<!-- <!DOCTYPE html>（第一行）：告訴瀏覽器「這是 HTML5 網頁」，每個網頁都要寫在最前面 -->
+
+<!-- <html>：整個網頁的最外層。lang="zh-Hant-TW" 表示內容是「台灣繁體中文」，
+     瀏覽器和螢幕閱讀器會用它決定字體和發音 -->
 <html lang="zh-Hant-TW">
-<!-- 水墨萬年曆 v9.1：八卦占卜加入家庭運勢；無變卦時也顯示說明
-     檔名後面的 ?v=9.1 是版本號：每次更新就改這個數字，瀏覽器才會下載新的檔案，不會用到舊的暫存 -->
+
+<!-- ======================================================================
+     <head>：網頁的「設定區」，這裡的東西不會直接顯示在畫面上
+     ====================================================================== -->
 <head>
+<!-- charset="UTF-8"：文字編碼。用 UTF-8 中文才不會變成亂碼 -->
 <meta charset="UTF-8">
+
+<!-- viewport：讓手機用正確的寬度顯示網頁，不會縮得很小。
+     viewport-fit=cover 讓畫面延伸到 iPhone 的瀏海和底部橫條區域 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- <title>：瀏覽器分頁上顯示的標題 -->
 <title>水墨萬年曆</title>
+
+<!-- description：網頁的簡短介紹，搜尋引擎（例如 Google）會顯示這段文字 -->
 <meta name="description" content="中國水墨留白風格的萬年曆：農曆、國定假日、行事曆、城市天氣、每日學習、八卦占卜">
-<link rel="stylesheet" href="css/style.css?v=9.1">
+
+<!-- <link rel="stylesheet">：載入 CSS 檔案（負責所有外觀、顏色、動畫）
+     href 是檔案的位置：css 資料夾裡的 style.css -->
+<link rel="stylesheet" href="css/style.css?v=14">
 </head>
+
+<!-- ======================================================================
+     <body>：網頁的「內容區」，畫面上看得到的東西都寫在這裡
+     ====================================================================== -->
 <body>
-<!-- 背景三層：底圖（已移除竹子與船）、竹子、小船 -->
+
+<!-- ======================================================================
+     一、背景山水畫（分成好幾層疊在一起，竹子和小船才能各自動）
+
+     <div>：一個「區塊」，本身沒有任何意義，就像一個空盒子，用來把東西包在一起
+     <img>：顯示圖片。src 是圖片位置；alt 是圖片的文字說明，
+            這裡寫 alt="" 是因為背景只是裝飾，不需要說明
+     ====================================================================== -->
 <div class="scene" aria-hidden="true">
   <div class="art">
+    <!-- 第一層：底圖（已經把竹子和船擦掉的山水） -->
     <img class="base" src="images/bg-base.webp" alt="">
+    <!-- 第二層：竹子（style.css 會讓它左右搖擺） -->
     <img class="bamboo" src="images/bg-bamboo.webp" alt="">
-    <!-- 船下的水波（放在船的下面一層） -->
+
+    <!-- 第三層：船底下的水波
+         <svg>：用「程式碼」畫圖的標籤，放大也不會模糊
+         viewBox="0 0 320 70"：畫布的座標範圍，寬 320、高 70
+         <g>：把幾個圖形包成一組，一起設定顏色和線條粗細
+         <ellipse>：橢圓。cx、cy 是中心點；rx、ry 是橫向、直向的半徑
+         <path>：自由曲線。d 裡面是畫線的指令（M 移到、q 曲線、t 延續曲線） -->
     <svg class="ripples" viewBox="0 0 320 70">
       <g fill="none" stroke="#222" stroke-linecap="round">
+        <!-- 三圈擴散的漣漪（CSS 會讓它們一圈接一圈放大、變淡） -->
         <ellipse class="ring r1" cx="150" cy="20" rx="130" ry="9" stroke-width="2"/>
         <ellipse class="ring r2" cx="150" cy="20" rx="130" ry="9" stroke-width="2"/>
         <ellipse class="ring r3" cx="150" cy="20" rx="130" ry="9" stroke-width="2"/>
+        <!-- 三道左右飄動的水紋 -->
         <path class="wave w1" d="M20 30 q12 -4 24 0 t24 0 t24 0" stroke-width="1.6"/>
         <path class="wave w2" d="M205 34 q12 -4 24 0 t24 0 t24 0" stroke-width="1.6"/>
         <path class="wave w3" d="M95 48 q12 -3 24 0 t24 0 t24 0" stroke-width="1.4"/>
       </g>
     </svg>
+
+    <!-- 第四層：船的倒影（和船是同一張圖，CSS 只顯示下半部，並讓它像在水裡晃） -->
     <img class="reflect" src="images/bg-boat.webp" alt="">
+    <!-- 第五層：船身（CSS 只顯示上半部，並讓它前後搖晃） -->
     <img class="boat" src="images/bg-boat.webp" alt="">
   </div>
 </div>
 
-<!-- 水墨濾鏡（花朵用） -->
+<!-- ======================================================================
+     二、水墨濾鏡（看不見的 SVG，只用來存放「濾鏡」）
+
+     width="0" height="0"：這個 SVG 本身不佔空間、看不見
+     <defs>：「定義區」，放在這裡的東西不會畫出來，而是讓別的地方拿去用
+     <filter id="名稱">：一個濾鏡。其他圖形寫 filter="url(#名稱)" 就能套用
+
+     濾鏡的原理：
+     feTurbulence      ：產生一片隨機的「雜訊」（像宣紙的纖維）
+     feDisplacementMap ：讓圖形照著雜訊扭曲，邊緣就會像墨水暈開
+     feGaussianBlur    ：模糊
+     ====================================================================== -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <!-- 占卜用：毛筆筆觸、淡墨暈染 -->
+    <!-- brush：毛筆的乾筆質感（八卦、銅錢、天氣圖示、入口圓圈） -->
     <filter id="brush" color-interpolation-filters="sRGB" x="-10%" y="-30%" width="120%" height="160%">
       <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="3" seed="4" result="n"/>
       <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5"/>
     </filter>
+    <!-- dwash：大範圍淡墨暈染（占卜畫面的背景墨團） -->
     <filter id="dwash" color-interpolation-filters="sRGB" x="-40%" y="-40%" width="180%" height="180%">
       <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="4" seed="11" result="n"/>
       <feDisplacementMap in="SourceGraphic" in2="n" scale="40" result="d"/>
       <feGaussianBlur in="d" stdDeviation="7"/>
     </filter>
-    <!-- waterwave：讓倒影像在水中晃動（波紋的密度會慢慢變化） -->
+    <!-- waterwave：讓倒影像在水中晃動
+         <animate>：讓濾鏡的數值隨時間改變，dur="7s" 是 7 秒一輪，repeatCount="indefinite" 是一直重複 -->
     <filter id="waterwave" color-interpolation-filters="sRGB" x="-5%" y="-5%" width="110%" height="110%">
       <feTurbulence type="turbulence" baseFrequency="0.01 0.12" numOctaves="1" seed="3" result="t">
         <animate attributeName="baseFrequency" dur="7s" values="0.01 0.10;0.01 0.16;0.01 0.10" repeatCount="indefinite"/>
       </feTurbulence>
       <feDisplacementMap in="SourceGraphic" in2="t" scale="7"/>
     </filter>
+    <!-- ink：讓花瓣、枝條的邊緣微微抖動，像墨水滲進宣紙 -->
     <filter id="ink" color-interpolation-filters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
       <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="3" result="n"/>
       <feDisplacementMap in="SourceGraphic" in2="n" scale="4"/>
     </filter>
-    <!-- wash：抖動更大、再加一點模糊，像淡墨暈染 -->
+    <!-- wash：抖動更大、再加一點模糊，像淡墨暈染（葉子、荷葉） -->
     <filter id="wash" color-interpolation-filters="sRGB" x="-30%" y="-30%" width="160%" height="160%">
       <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="8" result="n"/>
       <feDisplacementMap in="SourceGraphic" in2="n" scale="9" result="d"/>
       <feGaussianBlur in="d" stdDeviation="1.4"/>
     </filter>
-  
   </defs>
 </svg>
 
+<!-- ======================================================================
+     三、萬年曆本體
+
+     <main>：網頁的「主要內容」，一個網頁通常只有一個
+     <section>：一個「段落區塊」，用來把相關的內容放在一起
+     ====================================================================== -->
 <main>
   <section class="calendar" aria-label="萬年曆">
-    <!-- 花邊（上緣、下緣） -->
+
+    <!-- 上下兩條花框。裡面是空的，flowers.js 會用程式把花畫進去 -->
     <div class="garland top" id="gTop" aria-hidden="true"></div>
     <div class="garland bottom" id="gBottom" aria-hidden="true"></div>
 
     <div class="head">
+      <!-- <h1>：最大的標題。這裡是空的，app.js 會填入「2026 年 11 月」 -->
       <h1 id="title"></h1>
+      <!-- <button>：按鈕。按下去會做什麼，寫在 app.js 裡（用 id 找到這些按鈕） -->
       <div class="nav">
         <button id="prevYear">« 上一年</button>
         <button id="prevMonth">‹ 上個月</button>
@@ -81,33 +181,47 @@
         <button id="nextYear">下一年 »</button>
       </div>
     </div>
+
+    <!-- <p>：一段文字（paragraph）。app.js 會填入「今天是第幾天」 -->
     <p class="info" id="info"></p>
+    <!-- 近日提醒。hidden 屬性：先藏起來，有生日或紀念日時，app.js 才讓它顯示 -->
     <p class="remind" id="remind" hidden></p>
 
+    <!-- <table>：表格（就是月曆的格子）
+         <thead>：表格的標題列；<tbody>：表格的內容
+         <tr>：一列（table row）；<th>：標題格（table header）；<td>：一般的格子
+         日期的格子是 app.js 用迴圈產生的，所以 <tbody> 一開始是空的 -->
     <table>
       <thead><tr><th>日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th></tr></thead>
       <tbody id="days"></tbody>
     </table>
 
-    <!-- 當日資訊：點日期後顯示 -->
+    <!-- 當日資訊：點了某一天之後，下面顯示那一天的詳細資料 -->
     <section class="detail" id="detail" aria-label="當日資訊">
+      <!-- 存檔時短暫顯示「已儲存」。aria-live="polite"：內容改變時，螢幕閱讀器會唸出來 -->
       <span class="save-state" id="saveState" aria-live="polite"></span>
-      <div class="d-date" id="dDate"></div>
-      <div class="d-lunar" id="dLunar"></div>
-      <div class="d-fest" id="dFest"></div>
+      <div class="d-date" id="dDate"></div>    <!-- 完整日期 -->
+      <div class="d-lunar" id="dLunar"></div>  <!-- 農曆（下一行、字小一點） -->
+      <div class="d-fest" id="dFest"></div>    <!-- 節日、假日 -->
 
       <div class="d-block">
         <div class="d-title">行程與紀念日 <button class="link" id="addEvent">＋ 新增</button></div>
+        <!-- <ul>：沒有編號的清單（unordered list），每一項是 <li>。行程清單由 app.js 產生 -->
         <ul class="ev-list" id="evList"></ul>
       </div>
 
       <div class="d-row">
         <div class="d-block">
+          <!-- <label>：輸入框的「標籤文字」。for="memo" 代表它是 id="memo" 那個輸入框的標籤，
+               點文字也能把游標放進輸入框 -->
           <label class="d-title" for="memo">每日備忘</label>
+          <!-- <textarea>：可以打很多行字的輸入框。rows="2" 是預設高度兩行；
+               placeholder 是還沒打字時顯示的淡色提示 -->
           <textarea id="memo" rows="2" placeholder="寫下今天想記住的事"></textarea>
         </div>
         <div class="d-block">
           <div class="d-title" id="moodTitle">今日心情</div>
+          <!-- 五個心情按鈕由 app.js 產生。role="radiogroup" 告訴螢幕閱讀器「這是一組只能選一個的選項」 -->
           <div class="moods" id="moods" role="radiogroup" aria-labelledby="moodTitle"></div>
         </div>
       </div>
@@ -115,36 +229,44 @@
   </section>
 </main>
 
+<!-- ======================================================================
+     四、八卦占卜（右上角的小八卦 → 從右邊滑出的抽屜）
 
-
-<!-- ===== 八卦占卜 ===== -->
-<!-- 右上角入口：小小的淡墨八卦 -->
+     <aside>：「側邊內容」，和主要內容相關、但不是主角的東西，很適合抽屜
+     inert：抽屜關著的時候，讓鍵盤和螢幕閱讀器跳過它（打開時 JavaScript 會拿掉這個屬性）
+     aria-controls="drawer"：告訴螢幕閱讀器「這個按鈕控制 id="drawer" 那個抽屜」
+     aria-expanded="false"：目前是關著的（打開時 JavaScript 會改成 true）
+     ====================================================================== -->
 <button class="launcher" id="launcher" aria-label="打開八卦占卜" aria-controls="drawer" aria-expanded="false">
+  <!-- 小八卦的圖案是 divination.js 複製大八卦畫好的內容 -->
   <svg viewBox="-190 -190 380 380" aria-hidden="true"><g id="launcherBagua"></g></svg>
+  <!-- <span>：一小段文字，不換行。游標移上去時才顯示「搖卦」 -->
   <span class="tip">搖卦</span>
 </button>
+<!-- scrim：抽屜打開時，後面那一層淡淡的遮罩，點它可以關閉抽屜 -->
 <div class="scrim" id="scrim"></div>
-<!-- 從右側滑出的抽屜（關閉時用 inert 讓鍵盤和螢幕閱讀器跳過） -->
 <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="八卦占卜" inert>
   <div class="drawer-head">
+    <!-- <h2>：第二大的標題；<small>：小字 -->
     <h2>易占</h2><small>三錢搖卦</small>
     <span class="seal" aria-hidden="true">問心</span>
     <button class="close" id="closeDrawer" aria-label="關閉占卜">×</button>
   </div>
   <div class="drawer-body" id="drawerBody">
-  <!-- ===== 第一階段：點擊八卦 ===== -->
+  <!-- 第一階段：點擊八卦 -->
   <section id="stage1">
     <button id="baguaBtn" aria-label="點擊八卦，開始搖卦">
       <svg viewBox="-190 -190 380 380" aria-hidden="true">
-        <!-- 八卦後方的一團淡墨暈染 -->
+        <!-- <circle>：圓形。r 是半徑；currentColor 代表「用目前的文字顏色」，深色模式會自動變色 -->
         <circle r="150" fill="currentColor" fill-opacity=".08" filter="url(#dwash)"/>
+        <!-- 八卦和太極由 divination.js 畫進這個 <g> 裡 -->
         <g id="baguaSpin"></g>
       </svg>
     </button>
     <p class="hint" id="hint">靜心默念所問之事　輕點八卦</p>
   </section>
 
-  <!-- ===== 第二階段：搖卦 ===== -->
+  <!-- 第二階段：搖卦（三枚銅錢＋六爻清單） -->
   <section id="castArea" aria-live="polite">
     <div id="coinBox">
       <svg viewBox="20 60 320 130" role="img" aria-label="三枚銅錢">
@@ -153,10 +275,11 @@
       </svg>
       <p id="castStatus"></p>
     </div>
+    <!-- <ol>：有順序的清單（ordered list）。六爻由下往上一行一行出現 -->
     <ol id="yaoList"></ol>
   </section>
 
-  <!-- ===== 第三階段：結果 ===== -->
+  <!-- 第三階段：結果（本卦、變卦） -->
   <section id="result">
     <svg class="divider" viewBox="0 0 700 18" preserveAspectRatio="none" aria-hidden="true">
       <path d="M10 10 C150 6 300 12 450 8 S640 10 690 9" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" filter="url(#brush)" opacity=".7"/>
@@ -167,13 +290,15 @@
   </div>
 </aside>
 
-
-<!-- ===== 每日學習 ===== -->
-<!-- 入口：小八卦下面的「學」字 -->
+<!-- ======================================================================
+     五、每日學習（「學」字入口 → 抽屜）
+     ====================================================================== -->
 <button class="launcher study" id="studyLauncher" aria-label="打開每日學習" aria-controls="studyDrawer" aria-expanded="false">
   <svg viewBox="-190 -190 380 380" aria-hidden="true"><g>
+    <!-- 毛筆畫的圓圈（故意留一個缺口，像書法的「圓相」） -->
     <path d="M-10 -160 C90 -164 162 -92 160 4 C158 100 82 162 -4 160 C-100 156 -162 84 -158 -10 C-154 -88 -98 -146 -32 -158"
       fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" filter="url(#brush)"/>
+    <!-- <text>：SVG 裡的文字。text-anchor="middle" 讓文字以 x 為中心置中 -->
     <text x="0" y="52" text-anchor="middle" fill="currentColor">學</text>
   </g></svg>
   <span class="tip">每日學習</span>
@@ -184,12 +309,15 @@
     <h2>每日一學</h2>
     <button class="close" id="closeStudy" aria-label="關閉每日學習">×</button>
   </div>
+  <!-- 分頁按鈕。data-tab="en"：「data-」開頭的屬性是自己取名、用來存資料的，
+       study.js 會讀它，知道按的是哪一個分頁 -->
   <div class="s-tabs" id="studyTabs" role="tablist">
     <button role="tab" data-tab="en" aria-selected="true">英文</button>
     <button role="tab" data-tab="code" aria-selected="false">程式</button>
   </div>
   <div class="drawer-body" id="studyBody">
     <div class="s-bar"><span id="studyWhen"></span><span id="studyCount"></span></div>
+    <!-- 學習卡的內容由 study.js 填入 -->
     <div class="s-card" id="studyCard" aria-live="polite"></div>
     <div class="s-nav">
       <button class="link" id="prevCard">‹ 上一則</button>
@@ -199,20 +327,24 @@
     </div>
     <p class="s-progress" id="studyProgress"></p>
 
-    <!-- 新增學習卡（平常收起來） -->
+    <!-- <details>：可以展開、收起的區塊；<summary> 是一直看得到的那一行，點它就會展開 -->
     <details class="s-add">
       <summary>新增學習卡</summary>
+      <!-- <select>：下拉選單；<option>：選單裡的每一個選項，value 是程式讀到的值 -->
       <label>種類
         <select id="cType"><option value="en">英文</option><option value="code">程式</option></select>
       </label>
+      <!-- <input>：單行輸入框。maxlength 是最多幾個字；autocomplete="off" 是不要跳出瀏覽器記住的文字 -->
       <label id="lFront">單字<input id="cFront" maxlength="80" autocomplete="off"></label>
       <label id="lPos">詞性（選填）<input id="cPos" maxlength="20" placeholder="名詞" autocomplete="off"></label>
       <label id="lMeaning">中文意思<input id="cMeaning" maxlength="200" autocomplete="off"></label>
       <label id="lExample">例句（選填）<textarea id="cExample" rows="3"></textarea></label>
       <label id="lTrans">例句翻譯（選填）<input id="cTrans" maxlength="200" autocomplete="off"></label>
+      <!-- 錯誤訊息，例如「請輸入單字」 -->
       <p class="err" id="cErr" aria-live="polite"></p>
       <div class="btnrow"><button id="addCard">新增這張卡</button></div>
 
+      <!-- <code>：程式碼文字；<br>：換行 -->
       <p class="hint2">一次新增很多張：每行一張，用 <code>|</code> 分隔。<br>
         英文：<code>單字 | 意思 | 例句 | 翻譯</code><br>
         程式：<code>標題 | 說明 | 程式碼</code>（程式碼換行寫成 <code>\n</code>）</p>
@@ -223,8 +355,9 @@
   </div>
 </aside>
 
-<!-- ===== 城市天氣 ===== -->
-<!-- 入口：「學」下面的「氣」字 -->
+<!-- ======================================================================
+     六、城市天氣（「氣」字入口 → 抽屜）
+     ====================================================================== -->
 <button class="launcher weather" id="weatherLauncher" aria-label="打開城市天氣" aria-controls="weatherDrawer" aria-expanded="false">
   <svg viewBox="-190 -190 380 380" aria-hidden="true"><g>
     <path d="M6 -160 C100 -158 164 -84 160 10 C156 104 78 164 -10 160 C-104 154 -164 80 -158 -16 C-152 -94 -92 -150 -24 -159"
@@ -244,11 +377,12 @@
     <button role="tab" data-view="compare" aria-selected="false">比較</button>
   </div>
   <div class="drawer-body" id="weatherBody">
-    <!-- 加入城市：從清單選，或用英文名稱搜尋 -->
+    <!-- 加入城市：從下拉選單選（選項由 weather.js 產生） -->
     <div class="w-add">
       <select id="wSelect" aria-label="選擇城市"></select>
       <button class="w-btn" id="wAdd">加入</button>
     </div>
+    <!-- 或是用英文名稱搜尋 -->
     <div class="w-add">
       <input id="wSearch" placeholder="其他城市：輸入英文，例如 Kyoto" aria-label="用英文名稱搜尋其他城市" autocomplete="off">
       <button class="w-btn" id="wSearchBtn">搜尋</button>
@@ -256,8 +390,10 @@
     <p class="err" id="wErr" aria-live="polite"></p>
     <ul class="w-results" id="wResults"></ul>
 
+    <!-- 每個城市的天氣卡片由 weather.js 產生 -->
     <div id="wList" aria-live="polite"></div>
 
+    <!-- <footer>：區塊的「頁尾」，放資料來源、更新時間 -->
     <footer class="w-foot">
       <div><span id="wStatus"></span><button class="link" id="wRefresh">重新整理</button></div>
       <p>天氣資料：Open-Meteo<br><span id="wAlertState"></span></p>
@@ -265,20 +401,31 @@
   </div>
 </aside>
 
-<!-- 行程視窗：查看詳情、新增、修改、刪除 -->
+<!-- ======================================================================
+     七、行程視窗（查看詳情、新增、修改、刪除）
+
+     <dialog>：彈出視窗。平常看不到，JavaScript 呼叫 showModal() 才會出現
+     <form>：表單，把一組輸入框包在一起。在輸入框按 Enter 就會「送出」
+             novalidate：不要用瀏覽器內建的檢查，改用我們自己寫的提示文字
+     ====================================================================== -->
 <dialog id="evDialog" aria-labelledby="dlgTitle">
   <form id="evForm" novalidate>
+    <!-- <h3>：第三大的標題 -->
     <h3 id="dlgTitle">新增行程</h3>
+    <!-- 查看模式：顯示行程詳情（由 app.js 填入） -->
     <div id="evView"></div>
+    <!-- 編輯模式：輸入框 -->
     <div id="evEdit">
       <label>主旨<input id="fTitle" maxlength="60" placeholder="和朋友吃飯" autocomplete="off"></label>
       <p class="err" id="fErr" aria-live="polite"></p>
       <div class="grid2">
+        <!-- type="date"：日期選擇器；type="time"：時間選擇器（手機會跳出轉盤） -->
         <label>日期<input type="date" id="fDate"></label>
         <label>時間<input type="time" id="fTime"></label>
       </div>
       <div class="grid2">
         <label>分類<select id="fCat"></select></label>
+        <!-- type="checkbox"：勾選框。style="..." 是直接寫在標籤上的 CSS，這裡用來往下移一點對齊 -->
         <label class="check" style="margin-top:28px"><input type="checkbox" id="fImp">重要</label>
       </div>
       <label class="check"><input type="checkbox" id="fYearly">每年重複（生日、紀念日）</label>
@@ -286,6 +433,7 @@
       <label>詳細內容<textarea id="fNote" rows="3" placeholder="地點、要帶的東西、備註"></textarea></label>
     </div>
     <div class="dlg-actions">
+      <!-- type="button"：普通按鈕；type="submit"：送出表單的按鈕（按 Enter 也會觸發它） -->
       <button type="button" id="btnDelete" class="danger">刪除</button>
       <span class="spacer"></span>
       <button type="button" id="btnCancel">取消</button>
@@ -295,22 +443,36 @@
   </form>
 </dialog>
 
-<!-- 左下角工具列 -->
+<!-- ======================================================================
+     八、左下角工具列
+     title="..."：游標停在按鈕上時，跳出的小提示文字
+     ====================================================================== -->
 <div class="tools">
   <button id="redraw" title="讓這個月的花框換一種樣子">改變花框</button>
   <button id="exportBtn" title="把行程、備忘、心情存成一個檔案">匯出備份</button>
   <button id="importBtn" title="從備份檔還原資料">匯入備份</button>
+  <!-- type="file"：選擇檔案。hidden 讓它看不見，按「匯入備份」時 app.js 會幫你點它；
+       accept 限制只能選 .json 檔 -->
   <input type="file" id="importFile" accept="application/json,.json" hidden>
 </div>
 
-<!-- 程式：順序很重要，後面的檔案會用到前面檔案的函式 -->
-<script src="js/config.js?v=9.1"></script>     <!-- 設定（PHP 位置、氣象署授權碼） -->
-<script src="js/flowers.js?v=9.1"></script>    <!-- 水墨花朵與花邊 -->
-<script src="js/lunar.js?v=9.1"></script>      <!-- 農曆換算 -->
-<script src="js/holidays.js?v=9.1"></script>   <!-- 國定假日與節日 -->
-<script src="js/app.js?v=9.1"></script>        <!-- 萬年曆主程式 -->
-<script src="js/study.js?v=9.1"></script>      <!-- 每日學習 -->
-<script src="js/weather.js?v=9.1"></script>    <!-- 城市天氣 -->
-<script src="js/divination.js?v=9.1"></script> <!-- 八卦占卜 -->
+<!-- ======================================================================
+     九、載入 JavaScript 程式
+
+     <script src="...">：載入一個 JavaScript 檔案並執行
+     為什麼放在最後面？因為程式要「找到」上面的按鈕和區塊，
+     放在最後，執行時上面的 HTML 都已經準備好了。
+
+     順序很重要：後面的檔案會用到前面檔案寫好的東西
+     （例如 app.js 會用到 lunar.js 的農曆換算），所以不能隨便調換。
+     ====================================================================== -->
+<script src="js/config.js?v=14"></script>     <!-- 設定：氣象署授權碼（選填） -->
+<script src="js/flowers.js?v=14"></script>    <!-- 畫水墨花朵與花框 -->
+<script src="js/lunar.js?v=14"></script>      <!-- 國曆換農曆、節氣 -->
+<script src="js/holidays.js?v=14"></script>   <!-- 國定假日、補假、節日 -->
+<script src="js/app.js?v=14"></script>        <!-- 萬年曆主程式：畫月曆、行程、備忘、心情 -->
+<script src="js/study.js?v=14"></script>      <!-- 每日學習 -->
+<script src="js/weather.js?v=14"></script>    <!-- 城市天氣 -->
+<script src="js/divination.js?v=14"></script> <!-- 八卦占卜 -->
 </body>
 </html>
