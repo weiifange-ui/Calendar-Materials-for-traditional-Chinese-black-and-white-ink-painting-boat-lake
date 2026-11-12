@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   ==========================================================================
-  水墨萬年曆 v16（GitHub 完整版）｜index.html（網頁的骨架）
+  水墨萬年曆 v16.1（GitHub 完整版）｜index.html（網頁的骨架）
 
   【先認識註解】
   像這一大段文字一樣，被「開頭記號」和「結尾記號」包起來的內容叫做「註解」
@@ -30,7 +30,7 @@
   例如 aria-label="打開八卦占卜" 會被唸出來，讓看不到圖示的人也知道按鈕的用途。
   aria-hidden="true" 則是「這只是裝飾，不用唸出來」。
 
-  【檔名後面的 ?v=16】
+  【檔名後面的 ?v=16.1】
   這是版本號。瀏覽器會記住下載過的檔案（暫存），更新程式後如果不改這個數字，
   瀏覽器可能還在用舊的檔案。每次更新，就把所有 ?v= 後面的數字改掉。
   ==========================================================================
@@ -61,7 +61,7 @@
 
 <!-- <link rel="stylesheet">：載入 CSS 檔案（負責所有外觀、顏色、動畫）
      href 是檔案的位置：css 資料夾裡的 style.css -->
-<link rel="stylesheet" href="css/style.css?v=16">
+<link rel="stylesheet" href="css/style.css?v=16.1">
 </head>
 
 <!-- ======================================================================
@@ -374,7 +374,7 @@
   </div>
   <div class="s-tabs" id="wTabs" role="tablist">
     <button role="tab" data-view="list" aria-selected="true">城市</button>
-    <button role="tab" data-view="compare" aria-selected="false">比較</button>
+    <button role="tab" data-view="compare" aria-selected="false">清單</button>
   </div>
   <div class="drawer-body" id="weatherBody">
     <!-- 加入城市：從下拉選單選（選項由 weather.js 產生） -->
@@ -468,14 +468,14 @@
      順序很重要：後面的檔案會用到前面檔案寫好的東西
      （例如 app.js 會用到 lunar.js 的農曆換算），所以不能隨便調換。
      ====================================================================== -->
-<script src="js/config.js?v=16"></script>     <!-- 設定：氣象署授權碼（選填） -->
-<script src="js/flowers.js?v=16"></script>    <!-- 畫水墨花朵與花框 -->
-<script src="js/lunar.js?v=16"></script>      <!-- 國曆換農曆、節氣 -->
-<script src="js/holidays.js?v=16"></script>   <!-- 國定假日、補假、節日 -->
-<script src="js/app.js?v=16"></script>        <!-- 萬年曆主程式：畫月曆、行程、備忘、心情 -->
-<script src="js/study.js?v=16"></script>      <!-- 每日學習 -->
-<script src="js/townships.js?v=16"></script>  <!-- 台灣 368 個鄉鎮市區的座標 -->
-<script src="js/weather.js?v=16"></script>    <!-- 城市天氣 -->
-<script src="js/divination.js?v=16"></script> <!-- 八卦占卜 -->
+<script src="js/config.js?v=16.1"></script>     <!-- 設定：氣象署授權碼（選填） -->
+<script src="js/flowers.js?v=16.1"></script>    <!-- 畫水墨花朵與花框 -->
+<script src="js/lunar.js?v=16.1"></script>      <!-- 國曆換農曆、節氣 -->
+<script src="js/holidays.js?v=16.1"></script>   <!-- 國定假日、補假、節日 -->
+<script src="js/app.js?v=16.1"></script>        <!-- 萬年曆主程式：畫月曆、行程、備忘、心情 -->
+<script src="js/study.js?v=16.1"></script>      <!-- 每日學習 -->
+<script src="js/townships.js?v=16.1"></script>  <!-- 台灣 368 個鄉鎮市區的座標 -->
+<script src="js/weather.js?v=16.1"></script>    <!-- 城市天氣 -->
+<script src="js/divination.js?v=16.1"></script> <!-- 八卦占卜 -->
 </body>
 </html>

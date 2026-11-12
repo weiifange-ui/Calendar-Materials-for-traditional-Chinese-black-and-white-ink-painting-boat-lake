@@ -71,7 +71,7 @@
   let alerts = null;       // 氣象署天氣警報：{ "臺北市": [{ phenomena, significance }] }
   let alertState = "";     // 警報的取得狀態說明
   let lastUpdate = null;
-  let view = "list";       // list 城市、compare 比較
+  let view = "list";       // list 城市卡片、compare 清單（所有城市排成一張表）
   const openForecast = new Set();
 
   /* ---------- 取得天氣（直接向 Open-Meteo 要，免費、不需要授權碼） ---------- */
