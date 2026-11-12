@@ -569,42 +569,51 @@ td button.today .num::before {
 .w-add select[hidden] { display: none; }
 
 /* =====================================================
-   八卦游標＋白色乾筆尾巴（v21，程式在 js/cursor.js）
+   二胡游標＋飄出來的音符（v24，程式在 js/cursor.js）
    ===================================================== */
 /* 有滑鼠時，藏起原本的游標（輸入框維持原本的文字游標，比較好打字） */
 html.has-ink-cursor, html.has-ink-cursor * { cursor: none !important; }
 html.has-ink-cursor input, html.has-ink-cursor textarea { cursor: text !important; }
-/* 跳出視窗（行程視窗）時，換回原本的游標：彈出視窗會蓋在最上層，八卦游標會被擋住 */
+/* 跳出視窗（行程視窗）時，換回原本的游標：彈出視窗會蓋在最上層，二胡游標會被擋住 */
 html.has-ink-cursor:has(dialog[open]), html.has-ink-cursor:has(dialog[open]) * { cursor: auto !important; }
 html:has(dialog[open]) .ink-cursor, html:has(dialog[open]) .ink-trail { display: none; }
 
 .ink-cursor {
   position: fixed; left: 0; top: 0; z-index: 9999; pointer-events: none;
-  width: 30px; height: 30px; margin: -15px 0 0 -15px;      /* 讓八卦的中心對準滑鼠尖端 */
-  color: var(--ink); opacity: 0; transition: opacity .2s;
+  width: 100px;
+  /* 讓「琴筒」對準滑鼠：琴筒在圖片寬度 44%、高度 90% 的位置（圖片 100 × 101） */
+  margin: -91px 0 0 -44px;
+  opacity: 0; transition: opacity .2s;
 }
-.ink-cursor.show { opacity: .9; }
+.ink-cursor.show { opacity: .95; }
 .ink-cursor.hide { opacity: 0; }
-.ink-cursor svg { display: block; width: 100%; height: 100%; overflow: visible; transition: transform .2s; }
-.ink-cursor.hot svg { transform: scale(1.3); }               /* 移到按鈕上：變大一點 */
-.ink-cursor-spin { transform-box: fill-box; transform-origin: center; animation: spin 6s linear infinite; }
-.ink-cursor.hot .ink-cursor-spin { animation-duration: 2s; } /* 移到按鈕上：轉快一點 */
+.ink-cursor img {
+  display: block; width: 100%; height: auto;
+  transform-origin: 44% 90%;              /* 放大時以琴筒為中心 */
+  transition: transform .2s;
+}
+.ink-cursor.hot img { transform: scale(1.15); }   /* 移到按鈕上：稍微變大 */
+/* 深色模式：把墨色二胡反轉成白色，才看得見 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ink-cursor img { filter: invert(1); }
+}
+:root[data-theme="dark"] .ink-cursor img { filter: invert(1); }
 
 /* 手指按下時：像蓋印章一樣，從小放大再回到原本大小 */
-.ink-cursor.tap svg { animation: stamp .35s ease-out; }
+.ink-cursor.tap img { animation: stamp .35s ease-out; }
 @keyframes stamp {
   0%   { transform: scale(.3); opacity: 0; }
   60%  { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); }
 }
-/* 手機、平板：手指比較粗，八卦大一點才看得到 */
+/* 手機、平板：手指比較粗，二胡大一點 */
 @media (hover: none) {
-  .ink-cursor { width: 40px; height: 40px; margin: -20px 0 0 -20px; }
+  .ink-cursor { width: 120px; margin: -109px 0 0 -53px; }
 }
 
 .ink-trail { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 9998; pointer-events: none;
-  opacity: .5; }   /* v22.1：整條軌跡的透明度 0.5 */
+  opacity: .5; }   /* 音符的透明度 0.5 */
 
 @media (prefers-reduced-motion: reduce) {
-  .ink-cursor-spin, .ink-cursor.tap svg { animation: none; }
+  .ink-cursor.tap img { animation: none; }
 }

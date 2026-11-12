@@ -1,38 +1,34 @@
 /* =========================================================
-   水墨萬年曆 v22｜八卦游標＋白色乾筆尾巴
-   1. 滑鼠：游標換成一個會旋轉的小八卦，移動時後面拖出一道白色的乾筆尾巴：整條都是一絲一絲的筆毛，越往後越散、越斷斷續續（飛白）
-   2. 手機、平板：手指按下時，八卦出現在手指的位置；手指滑動時一樣拖出尾巴；放開後慢慢消失
+   水墨萬年曆 v24.1｜二胡游標＋飄出來的音符
+   1. 滑鼠：游標換成一把正在拉弦的水墨二胡（動畫圖片），游標的位置在最下面的琴筒；
+      移動時，琴筒會一路飄出白色的音符，慢慢往上飄、淡掉，像二胡拉出來的旋律
+   2. 手機、平板：手指按下時，二胡出現在手指的位置；手指滑動時一樣會飄出音符；放開後慢慢消失
 
-   使用者在系統設定了「減少動態效果」時，八卦不轉、也不畫軌跡。
+   使用者在系統設定了「減少動態效果」時，二胡改成不動的圖片，也不會飄出音符。
    整段包在 (() => { ... })() 裡，不和其他程式互相干擾
    ========================================================= */
 (() => {
-  // 占卜的大八卦（#baguaSpin）已經畫好了，游標直接複製它；這一頁沒有八卦就不做
-  const source = document.getElementById("baguaSpin");
-  if (!source) return;
-
   // matchMedia：問瀏覽器「這台裝置符不符合某個條件」
   // (hover: hover) and (pointer: fine)：有滑鼠（可以懸停、而且很精準）
   const hasMouse = matchMedia("(hover: hover) and (pointer: fine)").matches;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- 1. 建立八卦游標 ---------- */
-  const NS = "http://www.w3.org/2000/svg";
+  /* ---------- 1. 建立二胡游標 ----------
+     圖片是一把正在拉弦的二胡（images/cursor-erhu.webp，會動的 WebP 圖）
+     圖片的「熱點」（對準滑鼠的那一點）在最下面的琴筒，位置由 CSS 的 margin 決定 */
   const cursor = document.createElement("div");
   cursor.className = "ink-cursor";
   cursor.setAttribute("aria-hidden", "true");
-  const svg = document.createElementNS(NS, "svg");
-  svg.setAttribute("viewBox", "-190 -190 380 380");
-  const spin = document.createElementNS(NS, "g");
-  spin.setAttribute("class", "ink-cursor-spin");
-  spin.innerHTML = source.innerHTML;
-  svg.appendChild(spin);
-  cursor.appendChild(svg);
+  const img = document.createElement("img");
+  img.src = reduced ? "images/cursor-erhu-still.webp" : "images/cursor-erhu.webp";   // 減少動態效果：用不動的圖
+  img.alt = "";
+  img.draggable = false;
+  cursor.appendChild(img);
   document.body.appendChild(cursor);
   // 有滑鼠的裝置才藏起原本的游標（CSS 看到這個 class 才會藏）
   if (hasMouse) document.documentElement.classList.add("has-ink-cursor");
 
-  /* ---------- 2. 毛筆軌跡：畫在一張蓋滿畫面的 canvas 上 ---------- */
+  /* ---------- 2. 音符：畫在一張蓋滿畫面的 canvas 上 ---------- */
   // canvas：一塊可以用程式畫圖的畫布（和 SVG 不同，它是一點一點的像素）
   const canvas = document.createElement("canvas");
   canvas.className = "ink-trail";
@@ -48,39 +44,64 @@
   resize();
   addEventListener("resize", resize);
 
-  const LIFE = 420;          // 每一點存在多久（毫秒），越大尾巴越長
-  let points = [];           // 走過的點：{ x, y, t（時間） }
-  let x = -100, y = -100;    // 八卦目前的位置
+  const LIFE = 1200;         // 每個音符存在多久（毫秒）
+  const SPACING = 28;        // 滑鼠每移動多少 px，就飄出一個音符
+  let notes = [];            // 畫面上的音符：{ x, y, vx, vy, born, kind, size, rot, spin }
+  let travelled = 0;         // 上一個音符之後，滑鼠又走了多遠
+  let x = -100, y = -100;    // 二胡（琴筒）目前的位置
   let hideTimer;
 
-  /* ---------- 開關：左下角的「關閉軌跡」按鈕（v22） ----------
-     設定存在瀏覽器裡，下次打開還是同樣的狀態。關掉之後，八卦游標還在，只是不畫尾巴 */
+  /* ---------- 開關：左下角的「關閉音符」按鈕 ----------
+     設定存在瀏覽器裡，下次打開還是同樣的狀態。關掉之後，二胡游標還在，只是不飄音符 */
   let trailOn = true;
   try { trailOn = localStorage.getItem("inkTrail") !== "off"; } catch (e) {}
   const trailBtn = document.getElementById("trailBtn");
   function syncTrailBtn() {
     if (!trailBtn) return;
-    trailBtn.textContent = trailOn ? "關閉軌跡" : "開啟軌跡";   // 按鈕上寫的是「按下去會做什麼」
+    trailBtn.textContent = trailOn ? "關閉音符" : "開啟音符";   // 按鈕上寫的是「按下去會做什麼」
     trailBtn.setAttribute("aria-pressed", String(!trailOn));
   }
   if (trailBtn) {
     trailBtn.addEventListener("click", () => {
       trailOn = !trailOn;                                    // ! 是「相反」：開變關、關變開
-      points = [];
+      notes = [];
       try { localStorage.setItem("inkTrail", trailOn ? "on" : "off"); } catch (e) {}
       syncTrailBtn();
     });
     syncTrailBtn();
   }
 
+  // 移動到新的位置；走得夠遠了，就從琴筒飄出一個音符
   function moveTo(px, py) {
+    const dx = px - x, dy = py - y;
+    const jump = Math.hypot(dx, dy);
     x = px; y = py;
-    if (!reduced && trailOn) points.push({ x, y, t: performance.now() });   // 軌跡關掉時就不記錄
+    if (reduced || !trailOn || jump > 300) { travelled = 0; return; }   // 關掉了，或一下子跳太遠（例如剛進入畫面）就不飄
+    travelled += jump;
+    if (travelled < SPACING) return;
+    travelled = 0;
+    spawnNote(dx / (jump || 1), dy / (jump || 1));
+  }
+
+  // 飄出一個音符：往「滑鼠移動的反方向」慢慢退開，同時往上飄
+  const KINDS = ["quarter", "eighth", "eighth", "beamed"];   // 四分音符、八分音符（多一點）、兩個連在一起的八分音符
+  function spawnNote(dirX, dirY) {
+    notes.push({
+      x, y,
+      vx: -dirX * 0.03 + (Math.random() - 0.5) * 0.02,      // 每毫秒移動多少 px
+      vy: -dirY * 0.03 - 0.035,                              // 往上飄（y 越小越上面）
+      born: performance.now(),
+      kind: KINDS[Math.floor(Math.random() * KINDS.length)],
+      size: (13 + Math.random() * 7) / 3,                    // 大小：原本 13～20px 的 1/3，約 4～7px（v24.1）
+      rot: (Math.random() - 0.5) * 0.5,                      // 一開始稍微歪一點
+      spin: (Math.random() - 0.5) * 0.0008                   // 飄的時候慢慢轉
+    });
+    if (notes.length > 40) notes.shift();                    // 最多 40 個，太多就把最舊的拿掉
   }
   function show() { clearTimeout(hideTimer); cursor.classList.add("show"); }
   function hideLater(ms) {                                  // 過一段時間再藏起來
     clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => { cursor.classList.remove("show", "tap"); points = []; }, ms);
+    hideTimer = setTimeout(() => { cursor.classList.remove("show", "tap"); }, ms);
   }
 
   /* ---------- 3. 滑鼠 ---------- */
@@ -88,7 +109,7 @@
     if (e.pointerType === "mouse") {
       moveTo(e.clientX, e.clientY);
       show();
-      // 移到按鈕、連結上：八卦變大、轉快；移到輸入框：換回原本的文字游標
+      // 移到按鈕、連結上：二胡稍微變大；移到輸入框：換回原本的文字游標
       const t = e.target;
       cursor.classList.toggle("hot", !!(t.closest && t.closest("a, button, select, summary, label, [role=tab], td a")));
       cursor.classList.toggle("hide", !!(t.closest && t.closest("input, textarea")));
@@ -96,14 +117,14 @@
       moveTo(e.clientX, e.clientY);                         // 手指滑動
     }
   }, { passive: true });
-  document.addEventListener("mouseleave", () => { cursor.classList.remove("show"); points = []; });
+  document.addEventListener("mouseleave", () => { cursor.classList.remove("show"); });
 
   /* ---------- 4. 手指（手機、平板） ---------- */
   let fingerDown = false;
   addEventListener("pointerdown", e => {
     if (e.pointerType === "mouse") return;
     fingerDown = true;
-    points = [];
+    travelled = 0;
     cursor.classList.remove("hot", "hide");
     moveTo(e.clientX, e.clientY);
     cursor.classList.add("tap");                            // 出現時有一個「蓋印章」的放大縮小
@@ -121,117 +142,76 @@
   addEventListener("touchend", fingerUp, { passive: true });
   addEventListener("touchcancel", fingerUp, { passive: true });
 
-  /* ---------- 5. 畫尾巴 ---------- */
-  // 尾巴和八卦之間空出的距離（v18 是 0、v19 是 14，v20 取中間值 7）
-  const GAP = 7;
-  // offsetWidth 是八卦的寬度，一半就是半徑；變大（hot）時乘上 1.3
-  const radius = () => cursor.offsetWidth / 2 * (cursor.classList.contains("hot") ? 1.3 : 1) + GAP;
-
-  // 把太靠近八卦的點去掉，尾巴從圓的邊緣開始
-  // list 是「最新的點在最前面」：先跳過還在圓裡面的點，遇到第一個在圓外的點，
-  // 就在它和前一點之間找到圓邊，當作尾巴的最前端，後面的點全部保留
-  function trimNearCursor(list, R) {
-    const inside = p => Math.hypot(p.x - x, p.y - y) < R;
-    let i = 0;
-    while (i < list.length && inside(list[i])) i++;
-    if (i >= list.length) return [];                       // 全部都在圓裡面：沒有尾巴
-    const out = [];
-    if (i > 0) {
-      const a = list[i - 1], b = list[i];                  // a 在圓裡、b 在圓外
-      let lo = 0, hi = 1;
-      for (let k = 0; k < 12; k++) {                       // 二分法：一直對半找，找到剛好在圓邊上的位置
-        const m = (lo + hi) / 2;
-        const px = b.x + (a.x - b.x) * m, py = b.y + (a.y - b.y) * m;
-        if (Math.hypot(px - x, py - y) < R) hi = m; else lo = m;
-      }
-      out.push({ x: b.x + (a.x - b.x) * lo, y: b.y + (a.y - b.y) * lo, t: a.t });
-    }
-    return out.concat(list.slice(i));
-  }
-
-  // 固定的「隨機」數：同一個 seed 每次算出來都一樣，筆毛的樣子才不會一直閃
-  function rand(seed) {
-    const v = Math.sin(seed * 12.9898) * 43758.5453;
-    return v - Math.floor(v);                              // 0 ～ 1
-  }
-
-  /* ---------- 乾筆的形狀（v21.2：整條都是分岔的筆毛，沒有實心的部分） ----------
-     靠近八卦（筆頭）：筆毛比較密、比較少斷開
-     往後（筆尾）：筆毛散開、斷斷續續、長短不一（飛白）
-     t 代表位置：0 是筆頭（最新的點），1 是筆尾（最舊的點） */
-  const WIDTH = 5.5;                                        // 筆刷最寬的地方（v21.1：從 11 減半）
-  // 每一根筆毛的設定：在筆刷裡的位置、粗細、在哪裡結束
-  const BRISTLES = Array.from({ length: 28 }, (_, k) => ({
-    offset: (rand(k + 1) - 0.5) * 1.1,                      // -0.55 ～ 0.55：在寬度裡的位置（稍微超出一點，筆尾會散開）
-    width: 0.25 + rand(k + 20) * 0.75,                      // 粗細（v21.1：減半）
-    end: 0.6 + rand(k + 40) * 0.4                           // 這根筆毛在 t = 0.6～1 之間結束，長短不一
-  }));
-
-  // 滑鼠移動很快時，兩點之間會隔很遠，畫出來的筆毛會太直。
-  // 所以先在每兩點之間，每隔 3px 補一個點，筆毛才能「斷斷續續」
-  function resample(list) {
-    const out = [list[0]];
-    for (let i = 1; i < list.length; i++) {
-      const a = list[i - 1], b = list[i];
-      const steps = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 3));
-      for (let s = 1; s <= steps; s++) {
-        const m = s / steps;
-        out.push({ x: a.x + (b.x - a.x) * m, y: a.y + (b.y - a.y) * m, t: a.t + (b.t - a.t) * m });
-      }
-    }
-    return out;
-  }
-
-  // 每一點的「法線」：垂直於移動方向，用來把筆毛往兩側推開
-  function normals(list) {
-    return list.map((p, i) => {
-      const a = list[Math.max(0, i - 1)], b = list[Math.min(list.length - 1, i + 1)];
-      const dx = b.x - a.x, dy = b.y - a.y;
-      const len = Math.hypot(dx, dy) || 1;
-      return [-dy / len, dx / len];
-    });
-  }
-
-  function drawBrush(list, now) {
-    const n = normals(list);
-    const tOf = p => Math.min(1, (now - p.t) / LIFE);
-
-    // 筆毛：每一根各自畫成一條細線，越往後越容易斷開
+  /* ---------- 5. 畫音符 ----------
+     不用文字符號（♪），而是用線條和橢圓自己畫，每台電腦看起來都一樣
+     ctx.save() / ctx.restore()：先記住畫筆的狀態，移動、旋轉畫完一個音符後再還原 */
+  function drawNote(n, alpha, scale) {
+    const s = n.size * scale;
+    ctx.save();
+    ctx.translate(n.x, n.y);
+    ctx.rotate(n.rot);
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = Math.max(1, s * 0.09);
     ctx.lineCap = "round";
-    BRISTLES.forEach((br, k) => {
-      for (let i = 1; i < list.length; i++) {
-        const a = list[i - 1], b = list[i];
-        const t = tOf(b);
-        if (t > br.end) break;                              // 這根筆毛到這裡就結束了
-        // 斷開的機率：筆頭幾乎不斷，越往筆尾越容易斷（乾筆的飛白）
-        const dryness = 0.12 + t * 0.6;                     // 筆頭就有一點點斷開，越往後斷得越多
-        if (rand(Math.round(b.x * 0.7 + b.y * 1.3) + k * 3.1) < dryness) continue;
-        const spread = 0.8 + t * 0.8;                       // 筆頭比較收攏，越往後散得越開
-        const oa = br.offset * WIDTH * spread, ob = oa;
-        ctx.globalAlpha = 0.85 * (1 - t * 0.6);
-        ctx.lineWidth = br.width * (1 - t * 0.5);
+
+    // 符頭：一個斜斜的實心橢圓
+    const head = (hx, hy) => {
+      ctx.beginPath();
+      ctx.ellipse(hx, hy, s * 0.3, s * 0.21, -0.45, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    // 符桿：從符頭右邊往上畫一條直線
+    const stem = (hx, hy, top) => {
+      ctx.beginPath();
+      ctx.moveTo(hx + s * 0.27, hy - s * 0.05);
+      ctx.lineTo(hx + s * 0.27, top);
+      ctx.stroke();
+    };
+
+    if (n.kind === "beamed") {
+      // 兩個連在一起的八分音符（♫）
+      head(0, 0); head(s * 0.75, -s * 0.15);
+      stem(0, 0, -s); stem(s * 0.75, -s * 0.15, -s * 1.12);
+      ctx.lineWidth = s * 0.17;                              // 上面那條粗粗的橫桿
+      ctx.beginPath();
+      ctx.moveTo(s * 0.27, -s);
+      ctx.lineTo(s * 1.02, -s * 1.12);
+      ctx.stroke();
+    } else {
+      head(0, 0);
+      stem(0, 0, -s);
+      if (n.kind === "eighth") {
+        // 八分音符（♪）的小尾巴：從符桿頂端往右下彎
         ctx.beginPath();
-        ctx.moveTo(a.x + n[i - 1][0] * oa, a.y + n[i - 1][1] * oa);
-        ctx.lineTo(b.x + n[i][0] * ob, b.y + n[i][1] * ob);
+        ctx.moveTo(s * 0.27, -s);
+        ctx.quadraticCurveTo(s * 0.75, -s * 0.72, s * 0.55, -s * 0.38);
         ctx.stroke();
       }
-    });
+    }
+    ctx.restore();
   }
 
   // 每一幀（大約每秒 60 次）重畫一次
+  let last = performance.now();
   function frame(now) {
-    cursor.style.transform = `translate(${x}px, ${y}px)`;    // 八卦跟著走
+    const dt = Math.min(50, now - last);                     // 距離上一幀過了幾毫秒
+    last = now;
+    cursor.style.transform = `translate(${x}px, ${y}px)`;    // 二胡跟著走
 
     ctx.clearRect(0, 0, innerWidth, innerHeight);
-    points = points.filter(p => now - p.t < LIFE);          // 太舊的點丟掉
-    // 從最新的點往回整理（最新的在前面），去掉太靠近八卦的部分
-    const tail = trimNearCursor([...points].reverse(), radius());
-    if (tail.length > 2) {
-      ctx.fillStyle = "#fff";                                // 白色的墨
+    notes = notes.filter(n => now - n.born < LIFE);          // 太舊的音符拿掉
+    if (notes.length) {
+      ctx.fillStyle = "#fff";                                // 白色的音符
       ctx.strokeStyle = "#fff";
-      ctx.shadowColor = "rgba(0, 0, 0, .25)";                // 淡淡的灰色邊，淺色背景上才看得見白色
+      ctx.shadowColor = "rgba(0, 0, 0, .35)";                // 淡淡的灰色邊，淺色背景上才看得見白色
       ctx.shadowBlur = 2;
-      drawBrush(resample(tail), now);
+      for (const n of notes) {
+        n.x += n.vx * dt; n.y += n.vy * dt; n.rot += n.spin * dt;   // 移動、旋轉
+        const age = (now - n.born) / LIFE;                   // 0 剛出現，1 快消失
+        const alpha = age < 0.15 ? age / 0.15 : 1 - (age - 0.15) / 0.85;   // 先淡入，再慢慢淡出
+        const scale = 0.6 + 0.4 * Math.min(1, age / 0.2);    // 一開始小，很快長到原本大小
+        drawNote(n, alpha, scale);
+      }
       ctx.globalAlpha = 1;
       ctx.shadowBlur = 0;
     }
