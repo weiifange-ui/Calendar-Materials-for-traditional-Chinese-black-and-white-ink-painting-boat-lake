@@ -1,5 +1,5 @@
 /* =========================================================
-   水墨萬年曆 v15（GitHub 完整版）｜城市天氣
+   水墨萬年曆 v16（GitHub 完整版）｜城市天氣
    天氣資料：Open-Meteo（免費、不需要授權碼，台灣與國外都能查）
    天氣特報：中央氣象署（只有台灣；在 config.js 填入授權碼才會顯示，選用）
    整段包在 (() => { ... })() 裡，不和其他程式互相干擾
@@ -171,7 +171,7 @@
     else {
       const cur = w.current, d = w.daily;
       const [desc, kind] = describe(cur.weather_code);
-      const cwa = (c.tw && alerts && alerts[c.name]) || [];
+      const cwa = (c.tw && alerts && alerts[c.county || c.name]) || [];   // 鄉鎮市區用它所屬縣市的特報
       const warns = [...cwa.map(a => `${a.phenomena}${a.significance}`), ...autoWarnings(w).map(t => t + "提醒")];
       body = `
         <div class="w-now">${icon(kind, 46)}
@@ -236,29 +236,52 @@
     $("wAlertState").textContent = alertState;
   }
 
-  /* ---------- 加入城市 ---------- */
+  /* ---------- 加入城市（v16：台灣縣市可以再選鄉鎮市區） ---------- */
   function fillSelect() {
     const opt = list => list.map(([n, la, lo]) => `<option value="${la},${lo}">${n}</option>`).join("");
     $("wSelect").innerHTML = `<option value="">選擇城市</option>
       <optgroup label="台灣縣市">${opt(TAIWAN)}</optgroup><optgroup label="國外城市">${opt(WORLD)}</optgroup>`;
+    fillTowns();
   }
-  function addCity(name, lat, lon, tw) {
+
+  // 第二個選單：選了台灣的縣市，才列出它的鄉鎮市區（TOWNSHIPS 在 townships.js 裡）
+  function fillTowns() {
+    const sel = $("wSelect");
+    const county = sel.value ? sel.options[sel.selectedIndex].text : "";
+    const towns = TOWNSHIPS[county];
+    const town = $("wTown");
+    if (!towns) { town.hidden = true; town.innerHTML = ""; return; }   // 國外城市或還沒選：藏起來
+    town.hidden = false;
+    town.innerHTML = `<option value="">整個${county}</option>` +
+      towns.map(([n, la, lo]) => `<option value="${la},${lo}">${n}</option>`).join("");
+  }
+
+  // county：這個城市屬於哪個縣市（天氣特報是用縣市來對應的）
+  function addCity(name, lat, lon, tw, county) {
     if (store.cities.some(c => c.name === name)) { $("wErr").textContent = `「${name}」已經在清單裡了`; return; }
     const c = { id: "c-" + Date.now().toString(36), name, lat: Number(lat), lon: Number(lon), tw, fav: false };
+    if (county) c.county = county;
     store.cities.push(c); save();
     $("wErr").textContent = "";
     renderWeather();
     fetchCity(c).then(w => { weather[c.id] = w; renderWeather(); }).catch(() => { weather[c.id + ":err"] = true; renderWeather(); });
   }
   $("wAdd").addEventListener("click", () => {
-    const sel = $("wSelect");
+    const sel = $("wSelect"), town = $("wTown");
     if (!sel.value) { $("wErr").textContent = "請先選擇一個城市"; return; }
-    const [lat, lon] = sel.value.split(",");
-    const name = sel.options[sel.selectedIndex].text;
-    addCity(name, lat, lon, TAIWAN.some(t => t[0] === name));
-    sel.value = "";
+    const county = sel.options[sel.selectedIndex].text;
+    const isTaiwan = TAIWAN.some(t => t[0] === county);
+    if (isTaiwan && town.value) {
+      // 有選鄉鎮市區：名稱變成「新北市板橋區」，座標用鄉鎮市區的中心點
+      const [lat, lon] = town.value.split(",");
+      addCity(county + town.options[town.selectedIndex].text, lat, lon, true, county);
+    } else {
+      const [lat, lon] = sel.value.split(",");
+      addCity(county, lat, lon, isTaiwan, isTaiwan ? county : "");
+    }
+    sel.value = ""; fillTowns();
   });
-  $("wSelect").addEventListener("change", () => { $("wErr").textContent = ""; });
+  $("wSelect").addEventListener("change", () => { $("wErr").textContent = ""; fillTowns(); });
 
   // 搜尋其他城市（Open-Meteo 地名搜尋，用英文名稱搜尋）
   $("wSearchBtn").addEventListener("click", searchCity);
